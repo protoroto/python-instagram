@@ -38,9 +38,14 @@ class Image(ApiModel):
 
 
 class Video(Image):
+    def __init__(self, *args, **kwargs):
+        for k,v in kwargs.iteritems():
+            setattr(self,k,v)
+        super(Image, self).__init__(*args)
 
     def __unicode__(self):
         return "Video: %s" % self.url
+
 
 
 class Media(ApiModel):
@@ -96,8 +101,10 @@ class Media(ApiModel):
 
         new_media.comment_count = entry['comments']['count']
         new_media.comments = []
-        for comment in entry['comments']['data']:
-            new_media.comments.append(Comment.object_from_dictionary(comment))
+
+        if entry['comments'].get('data'):
+            for comment in entry['comments']['data']:
+                new_media.comments.append(Comment.object_from_dictionary(comment))
 
         new_media.users_in_photo = []
         if entry.get('users_in_photo'):
@@ -112,7 +119,7 @@ class Media(ApiModel):
         new_media.caption = None
         if entry['caption']:
             new_media.caption = Comment.object_from_dictionary(entry['caption'])
-        
+
         new_media.tags = []
         if entry['tags']:
             for tag in entry['tags']:
